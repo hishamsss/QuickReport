@@ -226,13 +226,10 @@ if uploaded_doc and uploaded_template:
             lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
             lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
-        # Replace placeholders
         replace_placeholders(template_doc, lookup)
 
-        # Superscript
         superscript_suffixes(template_doc)
 
-        # Delete rows and paragraphs
         delete_rows_with_dash(template_doc)
         #delete_paragraphs_containing_dash(template_doc)
 
