@@ -6,6 +6,7 @@ from io import BytesIO
 from copy import deepcopy
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from pathlib import Path
 
 # === Word Processing Functions ===
 def classify(percentile):
@@ -184,12 +185,15 @@ def delete_paragraphs_containing_dash(doc):
 st.title("📄 Word Document Filler")
 
 uploaded_doc = st.file_uploader("Upload Your WIAT-4 Report (.docx)", type="docx")
-uploaded_template = st.file_uploader("Upload Template Word Document (.docx)", type="docx")
+TEMPLATE_PATH = Path("template.docx")
+template_doc = Document(TEMPLATE_PATH)
 
-if uploaded_doc and uploaded_template:
+uploaded_doc = st.file_uploader("Upload Input Word Document (.docx)", type="docx")
+
+if uploaded_doc:
     if st.button("Generate Filled Template"):
         input_doc = Document(uploaded_doc)
-        template_doc = Document(uploaded_template)
+        working_template = Document(TEMPLATE_PATH)
 
         # Process tables
         target_table_indices = [2, 4, 9]
