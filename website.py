@@ -6,7 +6,6 @@ from io import BytesIO
 from copy import deepcopy
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-from pathlib import Path
 
 # === Word Processing Functions ===
 def classify(percentile):
@@ -162,7 +161,7 @@ def delete_rows_with_dash(doc):
         rows_to_delete = []
         for row_idx, row in enumerate(table.rows):
             for cell in row.cells:
-                if cell.text.strip() == "#":
+                if cell.text.strip() == "-":
                     rows_to_delete.append(row_idx)
                     break
         for row_idx in sorted(rows_to_delete, reverse=True):
@@ -184,16 +183,13 @@ def delete_paragraphs_containing_dash(doc):
 # === Streamlit App ===
 st.title("📄 Word Document Filler")
 
-uploaded_doc = st.file_uploader("Upload Your WIAT-4 Report (.docx)", type="docx")
-TEMPLATE_PATH = Path("template.docx")
-template_doc = Document(TEMPLATE_PATH)
+uploaded_doc = st.file_uploader("Upload WIAT Report (.docx)", type="docx")
+uploaded_template = st.file_uploader("Upload Template  (.docx)", type="docx")
 
-uploaded_doc = st.file_uploader("Upload Input Word Document (.docx)", type="docx")
-
-if uploaded_doc:
+if uploaded_doc and uploaded_template:
     if st.button("Generate Filled Template"):
         input_doc = Document(uploaded_doc)
-        working_template = Document(TEMPLATE_PATH)
+        template_doc = Document(uploaded_template)
 
         # Process tables
         target_table_indices = [2, 4, 9]
@@ -230,12 +226,15 @@ if uploaded_doc:
             lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
             lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
+        # Replace placeholders
         replace_placeholders(template_doc, lookup)
 
+        # Superscript
         superscript_suffixes(template_doc)
 
+        # Delete rows and paragraphs
         delete_rows_with_dash(template_doc)
-        #delete_paragraphs_containing_dash(template_doc)
+        delete_paragraphs_containing_dash(template_doc)
 
         # Save to BytesIO
         output = BytesIO()
