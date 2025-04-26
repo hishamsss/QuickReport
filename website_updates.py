@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
+import re
 from docx import Document
 from io import BytesIO
-import re
 from copy import deepcopy
 from docx.enum.text import WD_COLOR_INDEX
 
@@ -163,7 +163,7 @@ def delete_rows_with_dash(doc):
             for cell in row.cells:
                 if cell.text.strip() == "#":
                     rows_to_delete.append(row_idx)
-                    break  
+                    break
         for row_idx in sorted(rows_to_delete, reverse=True):
             tbl = table._tbl
             tr = table.rows[row_idx]._tr
@@ -190,7 +190,7 @@ def highlight_unfilled_placeholders(doc):
     def highlight_placeholder_in_runs(runs):
         combined_text = ''
         run_indices = []
-        
+
         for idx, run in enumerate(runs):
             combined_text += run.text
             run_indices.append(idx)
@@ -221,7 +221,7 @@ def highlight_unfilled_placeholders(doc):
                 for para in cell.paragraphs:
                     highlight_placeholder_in_runs(para.runs)
 
-# === Streamlit App Layout ===
+# === Streamlit App ===
 
 st.title("📄 WIAT-4 Word Report Filler")
 
