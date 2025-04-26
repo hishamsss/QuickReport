@@ -35,29 +35,6 @@ def classify(percentile):
     else:
         return "-"
 
-# === Extract and Process Tables ===
-writer = pd.ExcelWriter(output_excel_path, engine='openpyxl')
-
-for i in target_table_indices:
-    if i < len(doc.tables):
-        table = doc.tables[i]
-        data = []
-        for row in table.rows:
-            data.append([cell.text.strip() for cell in row.cells])
-        df = pd.DataFrame(data)
-
-        if df.shape[0] > 1:
-            df.columns = df.iloc[0]
-            df = df.drop(index=0).reset_index(drop=True)
-
-        df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
-
-        if df.shape[1] >= 5:
-            ae_df = df.iloc[:, [0, 4]].copy()
-            ae_df.columns = ['Name', 'Percentile']
-            ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
-        else:
-            print(f"⚠️ Skipped A/E columns for Table_{i+1} (only {df.shape[1]} columns present)")
 
 def format_percentile_with_suffix(percentile):
     try:
@@ -95,27 +72,6 @@ def format_percentile_with_suffix(percentile):
         return f"{int(percentile)}{suffix}"
     else:
         return f"{percentile}{suffix}"
-
-# After extraction
-if not ae_combined.empty:
-    ae_combined.drop_duplicates(subset='Name', inplace=True)
-    ae_combined["Classification"] = ae_combined["Percentile"].apply(classify)
-    ae_combined["Percentile*"] = ae_combined["Percentile"].apply(format_percentile_with_suffix)
-    ae_combined = ae_combined.replace("-", "#")
-    #ae_combined.to_excel(writer, sheet_name="combine", index=False)
-
-writer.close()
-
-print("✅ Extracted DataFrame:")
-print(ae_combined)
-
-# === Build Lookup for Placeholder Replacement ===
-lookup = {}
-for idx, row in ae_combined.iterrows():
-    name = row['Name'].strip()
-    lookup[f"{name} Classification"] = row['Classification']
-    lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
-    lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
 # === Replace placeholders in template ===
 def replace_placeholders(doc, lookup):
@@ -244,10 +200,6 @@ def delete_rows_with_unfilled_placeholders(doc):
             tbl = table._tbl
             tr = table.rows[row_idx]._tr
             tbl.remove(tr)
-
-from docx.enum.text import WD_COLOR_INDEX
-
-from docx.enum.text import WD_COLOR_INDEX
 
 def highlight_unfilled_placeholders(doc):
     placeholder_pattern = re.compile(r"\{\{.*?\}\}")
