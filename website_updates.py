@@ -225,7 +225,7 @@ def highlight_unfilled_placeholders(doc):
 
 st.title("📄 WIAT-4 Word Report Filler")
 
-uploaded_doc = st.file_uploader("Upload WIAT-4 Report (.docx)", type="docx")
+uploaded_doc = st.file_uploader("Upload WIAT-4 Doc (.docx)", type="docx")
 
 if uploaded_doc:
     if st.button("Generate Filled Template"):
