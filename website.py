@@ -161,7 +161,7 @@ def delete_rows_with_dash(doc):
         rows_to_delete = []
         for row_idx, row in enumerate(table.rows):
             for cell in row.cells:
-                if cell.text.strip() == "-":
+                if cell.text.strip() == "#":
                     rows_to_delete.append(row_idx)
                     break
         for row_idx in sorted(rows_to_delete, reverse=True):
