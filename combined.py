@@ -283,23 +283,20 @@ if uploaded_doc and uploaded_wisc:
         input_wisc_doc = Document(uploaded_wisc)
         wisc_template = Document("wisc_template.docx")
 
-        wisc_target_table_indices = [2, 4, 5, 6, 7, 8, 9, 10]
         wisc_combined = pd.DataFrame()
 
-        for i in wisc_target_table_indices:
-            if i < len(input_wisc_doc.tables):
-                table = input_wisc_doc.tables[i]
-                data = []
-                for row in table.rows:
-                    data.append([cell.text.strip() for cell in row.cells])
-                df = pd.DataFrame(data)
+        for i, table in enumerate(input_wisc_doc.tables):
+            data = []
+            for row in table.rows:
+                data.append([cell.text.strip() for cell in row.cells])
+            df = pd.DataFrame(data)
 
-                if df.shape[0] > 1:
-                    df.columns = df.iloc[0]
-                    df = df.drop(index=0).reset_index(drop=True)
+            if df.shape[0] > 1:
+                df.columns = df.iloc[0]
+                df = df.drop(index=0).reset_index(drop=True)
 
-                    st.write(f"📊 Raw WISC Table {i+1}")
-                    st.dataframe(df)
+                st.write(f"📊 Raw WISC Table {i+1}")
+                st.dataframe(df)
 
                 if df.shape[1] >= 6:
                     ae_df = df.iloc[:, [1, 5]].copy()
