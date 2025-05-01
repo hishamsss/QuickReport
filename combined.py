@@ -299,7 +299,7 @@ if uploaded_doc and uploaded_wisc:
                     df = df.drop(index=0).reset_index(drop=True)
 
                 if df.shape[1] >= 5:
-                    ae_df = df.iloc[:, [0, 4]].copy()
+                    ae_df = df.iloc[:, [1, 5]].copy()
                     ae_df.columns = ['Name', 'Percentile']
                     wisc_combined = pd.concat([wisc_combined, ae_df], ignore_index=True)
 
