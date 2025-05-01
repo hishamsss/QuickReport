@@ -240,7 +240,7 @@ if uploaded_doc and uploaded_wisc:
         template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
         template_doc = Document(template_path)
 
-        target_table_indices = [2, 4, 5, 6, 7, 8, 9, 10]
+        target_table_indices = [2, 3, 4, 5, 6, 7, 8, 9, 10]
         ae_combined = pd.DataFrame()
 
         for i in target_table_indices:
