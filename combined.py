@@ -296,15 +296,15 @@ if uploaded_doc and uploaded_wisc:
                 df.columns = df.iloc[0]
                 df = df.drop(index=0).reset_index(drop=True)
 
-                #st.write(f"📊 Raw WISC Table {i+1}")
-                #st.dataframe(df)
+                st.write(f"📊 Raw WISC Table {i+1}")
+                st.dataframe(df)
 
                 if df.shape[1] >= 6:
                     ae_df = df.iloc[:, [1, 5]].copy()
                     ae_df.columns = ['Name', 'Percentile']
                     ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
-                    #st.write(f"🧠 A/E Data from WISC Table {i+1}")
-                    #st.dataframe(ae_df)
+                    st.write(f"🧠 A/E Data from WISC Table {i+1}")
+                    st.dataframe(ae_df)
             
                     wisc_combined = pd.concat([wisc_combined, ae_df], ignore_index=True)
 
