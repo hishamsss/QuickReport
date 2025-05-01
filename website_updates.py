@@ -232,11 +232,12 @@ if uploaded_doc:
         "Select Report Type:",
         ("Male", "Female")
     )
+
     if st.button("Generate Filled Template"):
         input_doc = Document(uploaded_doc)
         template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
         template_doc = Document(template_path)
-        
+
         target_table_indices = [2, 4, 5, 6, 7, 8, 9, 10]
         ae_combined = pd.DataFrame()
 
