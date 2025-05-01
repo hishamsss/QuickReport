@@ -299,13 +299,19 @@ if uploaded_doc and uploaded_wisc:
                 st.write(f"📊 Raw WISC Table {i+1}")
                 st.dataframe(df)
 
-                if df.shape[1] >= 6:
-                    ae_df = df.iloc[:, [1, 5]].copy()
+                if df.shape[1] >= 5:
+                    if i == 5:  # Table 6 (0-indexed)
+                        ae_df = df.iloc[:, [1, 4]].copy()
+                    elif df.shape[1] >= 6:
+                        ae_df = df.iloc[:, [1, 5]].copy()
+                    else:
+                        continue  # Not enough columns
+                
                     ae_df.columns = ['Name', 'Percentile']
                     ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
                     st.write(f"🧠 A/E Data from WISC Table {i+1}")
                     st.dataframe(ae_df)
-            
+                
                     wisc_combined = pd.concat([wisc_combined, ae_df], ignore_index=True)
 
         if not wisc_combined.empty:
