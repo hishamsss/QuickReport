@@ -258,6 +258,7 @@ if uploaded_doc and uploaded_wisc:
                 if df.shape[1] >= 5:
                     ae_df = df.iloc[:, [0, 4]].copy()
                     ae_df.columns = ['Name', 'Percentile']
+                    ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
                     ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
 
         if not ae_combined.empty:
@@ -301,6 +302,7 @@ if uploaded_doc and uploaded_wisc:
                 if df.shape[1] >= 6:
                     ae_df = df.iloc[:, [1, 5]].copy()
                     ae_df.columns = ['Name', 'Percentile']
+                    ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
                     st.write(f"🧠 A/E Data from WISC Table {i+1}")
                     st.dataframe(ae_df)
             
