@@ -292,12 +292,13 @@ if uploaded_doc and uploaded_wisc:
                 data.append([cell.text.strip() for cell in row.cells])
             df = pd.DataFrame(data)
 
-            st.write(f"📊 Raw WISC Table {i+1}")
-                st.dataframe(df)
+       
             
             if df.shape[0] > 1:
                 df.columns = df.iloc[0]
                 df = df.drop(index=0).reset_index(drop=True)
+                st.write(f"📊 Raw WISC Table {i+1}")
+                st.dataframe(df)
 
                 if df.shape[1] >= 5:
                     if i == 5:  # Table 6 (0-indexed)
