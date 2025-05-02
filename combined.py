@@ -234,26 +234,30 @@ with tab2:
     uploaded_wisc = st.file_uploader("🧠 Upload WISC Report (.docx)", type="docx", key="wisc_upload")
 
 with tab3:
-    st.subheader("🧠 Enter ChAMP Scores")
+    left_col, right_col = st.columns([1, 3])
 
-    champ_fields = [
-        "Lists", "Objects", "Instructions", "Places", "Lists Delayed",
-        "Lists Recognition", "Objects Delayed", "Instructions Delayed",
-        "Instructions Recognition", "Places Delayed", "Verbal Memory Index",
-        "Visual Memory Index", "Immediate Memory Index", "Delayed Memory Index",
-        "Total Memory Index", "Screening Index"
-    ]
+    with left_col:
+        st.subheader("🧠 ChAMP Scores")
 
-    champ_data = []
-    for field in champ_fields:
-        value = st.text_input(f"{field} Percentile", key=f"champ_{field}")
-        champ_data.append({"Name": field, "Percentile": value})
+    with right_col:
+        champ_fields = [
+            "Lists", "Objects", "Instructions", "Places", "Lists Delayed",
+            "Lists Recognition", "Objects Delayed", "Instructions Delayed",
+            "Instructions Recognition", "Places Delayed", "Verbal Memory Index",
+            "Visual Memory Index", "Immediate Memory Index", "Delayed Memory Index",
+            "Total Memory Index", "Screening Index"
+        ]
 
-    champ_df = pd.DataFrame(champ_data)
-    if not champ_df["Percentile"].eq("").all():
-        champ_df["Classification"] = champ_df["Percentile"].apply(classify)
-        champ_df["Percentile*"] = champ_df["Percentile"].apply(format_percentile_with_suffix)
-        champ_df = champ_df.replace("-", "#")
+        champ_data = []
+        for field in champ_fields:
+            value = st.text_input(f"{field} Percentile", key=f"champ_{field}")
+            champ_data.append({"Name": field, "Percentile": value})
+
+        champ_df = pd.DataFrame(champ_data)
+        if not champ_df["Percentile"].eq("").all():
+            champ_df["Classification"] = champ_df["Percentile"].apply(classify)
+            champ_df["Percentile*"] = champ_df["Percentile"].apply(format_percentile_with_suffix)
+            champ_df = champ_df.replace("-", "#")
 
 with tab4:
     st.subheader("✍️ Enter Beery Scores")
