@@ -239,129 +239,107 @@ with tab3:
 with tab4:
     st.info("🔧 Beery integration coming soon...")
 
+with tab5:
+    if uploaded_doc and uploaded_wisc:
+        gender_selection = st.radio(
+            "Select WIAT Report Gender Template:",
+            ("Male", "Female"),
+            key="gender"
+        )
 
-if uploaded_doc and uploaded_wisc:
-    gender_selection = st.radio(
-        "Select WIAT Report Gender Template:",
-        ("Male", "Female")
-    )
+        if st.button("Generate Combined Report"):
+            input_doc = Document(uploaded_doc)
+            template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
+            template_doc = Document(template_path)
 
-    if st.button("Generate Combined Report"):
-        # === WIAT Processing ===
-        input_doc = Document(uploaded_doc)
-        template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
-        template_doc = Document(template_path)
+            target_table_indices = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+            ae_combined = pd.DataFrame()
 
-        target_table_indices = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-        ae_combined = pd.DataFrame()
+            for i in target_table_indices:
+                if i < len(input_doc.tables):
+                    table = input_doc.tables[i]
+                    data = [[cell.text.strip() for cell in row.cells] for row in table.rows]
+                    df = pd.DataFrame(data)
+                    if df.shape[0] > 1:
+                        df.columns = df.iloc[0]
+                        df = df.drop(index=0).reset_index(drop=True)
+                    if df.shape[1] >= 5:
+                        ae_df = df.iloc[:, [0, 4]].copy()
+                        ae_df.columns = ['Name', 'Percentile']
+                        ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
+                        ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
 
-        for i in target_table_indices:
-            if i < len(input_doc.tables):
-                table = input_doc.tables[i]
-                data = []
-                for row in table.rows:
-                    data.append([cell.text.strip() for cell in row.cells])
+            if not ae_combined.empty:
+                ae_combined.drop_duplicates(subset='Name', inplace=True)
+                ae_combined["Classification"] = ae_combined["Percentile"].apply(classify)
+                ae_combined["Percentile*"] = ae_combined["Percentile"].apply(format_percentile_with_suffix)
+                ae_combined = ae_combined.replace("-", "#")
+
+            lookup = {}
+            for _, row in ae_combined.iterrows():
+                name = row['Name'].strip()
+                lookup[f"{name} Classification"] = row['Classification']
+                lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
+                lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
+
+            replace_placeholders(template_doc, lookup)
+            superscript_suffixes(template_doc)
+            delete_rows_with_dash(template_doc)
+            delete_rows_with_unfilled_placeholders(template_doc)
+            highlight_unfilled_placeholders(template_doc)
+
+            input_wisc_doc = Document(uploaded_wisc)
+            wisc_template = Document("wisc_template.docx")
+            wisc_combined = pd.DataFrame()
+
+            for i, table in enumerate(input_wisc_doc.tables):
+                data = [[cell.text.strip() for cell in row.cells] for row in table.rows]
                 df = pd.DataFrame(data)
-
                 if df.shape[0] > 1:
                     df.columns = df.iloc[0]
                     df = df.drop(index=0).reset_index(drop=True)
+                    if df.shape[1] >= 5:
+                        if i == 5 or i == 15:
+                            ae_df = df.iloc[:, [1, 4]].copy()
+                        elif df.shape[1] >= 6:
+                            ae_df = df.iloc[:, [1, 5]].copy()
+                        else:
+                            continue
+                        ae_df.columns = ['Name', 'Percentile']
+                        ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
+                        wisc_combined = pd.concat([wisc_combined, ae_df], ignore_index=True)
 
-                if df.shape[1] >= 5:
-                    ae_df = df.iloc[:, [0, 4]].copy()
-                    ae_df.columns = ['Name', 'Percentile']
-                    ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
-                    ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
+            if not wisc_combined.empty:
+                wisc_combined.drop_duplicates(subset='Name', inplace=True)
+                wisc_combined["Classification"] = wisc_combined["Percentile"].apply(classify)
+                wisc_combined["Percentile*"] = wisc_combined["Percentile"].apply(format_percentile_with_suffix)
+                wisc_combined = wisc_combined.replace("-", "#")
 
-        if not ae_combined.empty:
-            ae_combined.drop_duplicates(subset='Name', inplace=True)
-            ae_combined["Classification"] = ae_combined["Percentile"].apply(classify)
-            ae_combined["Percentile*"] = ae_combined["Percentile"].apply(format_percentile_with_suffix)
-            ae_combined = ae_combined.replace("-", "#")
+            wisc_lookup = {}
+            for _, row in wisc_combined.iterrows():
+                name = row['Name'].strip()
+                wisc_lookup[f"{name} Classification"] = row['Classification']
+                wisc_lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
+                wisc_lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
-        lookup = {}
-        for idx, row in ae_combined.iterrows():
-            name = row['Name'].strip()
-            lookup[f"{name} Classification"] = row['Classification']
-            lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
-            lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
+            replace_placeholders(wisc_template, wisc_lookup)
+            superscript_suffixes(wisc_template)
+            delete_rows_with_dash(wisc_template)
+            delete_rows_with_unfilled_placeholders(wisc_template)
+            highlight_unfilled_placeholders(wisc_template)
 
-        replace_placeholders(template_doc, lookup)
-        superscript_suffixes(template_doc)
-        delete_rows_with_dash(template_doc)
-        delete_rows_with_unfilled_placeholders(template_doc)
-        highlight_unfilled_placeholders(template_doc)
+            for element in wisc_template.element.body:
+                template_doc.element.body.append(element)
 
-        # === WISC Processing ===
-        input_wisc_doc = Document(uploaded_wisc)
-        wisc_template = Document("wisc_template.docx")
+            output = BytesIO()
+            template_doc.save(output)
+            output.seek(0)
 
-        wisc_combined = pd.DataFrame()
+            st.success("✅ Combined document generated successfully!")
 
-        for i, table in enumerate(input_wisc_doc.tables):
-            data = []
-            for row in table.rows:
-                data.append([cell.text.strip() for cell in row.cells])
-            df = pd.DataFrame(data)
-
-       
-            
-            if df.shape[0] > 1:
-                df.columns = df.iloc[0]
-                df = df.drop(index=0).reset_index(drop=True)
-                #st.write(f"📊 Raw WISC Table {i+1}")
-                #st.dataframe(df)
-
-                if df.shape[1] >= 5:
-                    if i == 5:  # Table 6 (0-indexed)
-                        ae_df = df.iloc[:, [1, 4]].copy()
-                    elif i == 15:  # Table 16 (0-indexed)
-                        ae_df = df.iloc[:, [1, 4]].copy()
-                    elif df.shape[1] >= 6:
-                        ae_df = df.iloc[:, [1, 5]].copy()
-                    else:
-                        continue  # Not enough columns
-                
-                    ae_df.columns = ['Name', 'Percentile']
-                    ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
-                    #st.write(f"🧠 A/E Data from WISC Table {i+1}")
-                    #st.dataframe(ae_df)
-                
-                    wisc_combined = pd.concat([wisc_combined, ae_df], ignore_index=True)
-
-        if not wisc_combined.empty:
-            wisc_combined.drop_duplicates(subset='Name', inplace=True)
-            wisc_combined["Classification"] = wisc_combined["Percentile"].apply(classify)
-            wisc_combined["Percentile*"] = wisc_combined["Percentile"].apply(format_percentile_with_suffix)
-            wisc_combined = wisc_combined.replace("-", "#")
-
-        wisc_lookup = {}
-        for idx, row in wisc_combined.iterrows():
-            name = row['Name'].strip()
-            wisc_lookup[f"{name} Classification"] = row['Classification']
-            wisc_lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
-            wisc_lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
-
-        replace_placeholders(wisc_template, wisc_lookup)
-        superscript_suffixes(wisc_template)
-        delete_rows_with_dash(wisc_template)
-        delete_rows_with_unfilled_placeholders(wisc_template)
-        highlight_unfilled_placeholders(wisc_template)
-
-        # === Append WISC to WIAT ===
-        for element in wisc_template.element.body:
-            template_doc.element.body.append(element)
-
-        # === Output ===
-        output = BytesIO()
-        template_doc.save(output)
-        output.seek(0)
-
-        st.success("✅ Combined document generated successfully!")
-
-        st.download_button(
-            label="📥 Download Combined Report",
-            data=output,
-            file_name="combined_report.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+            st.download_button(
+                label="📥 Download Combined Report",
+                data=output,
+                file_name="combined_report.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
