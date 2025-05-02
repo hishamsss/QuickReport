@@ -3,7 +3,6 @@ import pandas as pd
 import re
 from docx import Document
 from io import BytesIO
-from copy import deepcopy
 from docx.enum.text import WD_COLOR_INDEX
 
 # === Helper Functions ===
@@ -223,12 +222,12 @@ def highlight_unfilled_placeholders(doc):
 
 # === Streamlit App ===
 
-st.title("📄 Report Writer")
+st.title("\U0001F4C4 Report Writer")
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "Finalize"])
 
 with tab1:
-    uploaded_doc = st.file_uploader("📄 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
+    uploaded_doc = st.file_uploader("\U0001F4C4 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
 
 with tab2:
     uploaded_wisc = st.file_uploader("🧠 Upload WISC Report (.docx)", type="docx", key="wisc_upload")
@@ -258,7 +257,7 @@ with tab3:
         champ_df["Classification"] = champ_df["Percentile"].apply(classify)
         champ_df["Percentile*"] = champ_df["Percentile"].apply(format_percentile_with_suffix)
         champ_df = champ_df.replace("-", "#")
-        
+
 with tab4:
     st.subheader("✍️ Enter Beery Scores")
 
@@ -266,20 +265,6 @@ with tab4:
     vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
     mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
 
-    # Optionally format and preview the classified values
-    if vmi or vp or mc:
-        beery_df = pd.DataFrame([
-            {"Name": "VMI", "Percentile": vmi},
-            {"Name": "VP", "Percentile": vp},
-            {"Name": "MC", "Percentile": mc},
-        ])
-
-        beery_df["Classification"] = beery_df["Percentile"].apply(classify)
-        beery_df["Percentile*"] = beery_df["Percentile"].apply(format_percentile_with_suffix)
-        beery_df = beery_df.replace("-", "#")
-
-        #st.dataframe(beery_df[["Name", "Percentile", "Percentile*", "Classification"]], use_container_width=True)
-        
 with tab5:
     if uploaded_doc and uploaded_wisc:
         gender_selection = st.radio(
@@ -293,6 +278,7 @@ with tab5:
             template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
             template_doc = Document(template_path)
 
+            # === Process WIAT Tables ===
             target_table_indices = [2, 3, 4, 5, 6, 7, 8, 9, 10]
             ae_combined = pd.DataFrame()
 
@@ -323,7 +309,6 @@ with tab5:
                 lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                 lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
-            #Beery Fill In Section
             if vmi:
                 lookup["VMI Percentile"] = vmi
                 lookup["VMI Percentile*"] = format_percentile_with_suffix(vmi)
@@ -337,7 +322,6 @@ with tab5:
                 lookup["MC Percentile*"] = format_percentile_with_suffix(mc)
                 lookup["MC Classification"] = classify(mc)
 
-            #ChAMP Fill In Section
             if not champ_df.empty:
                 for _, row in champ_df.iterrows():
                     name = row['Name'].strip()
@@ -345,14 +329,8 @@ with tab5:
                     lookup[f"{name} Percentile*"] = row['Percentile*']
                     lookup[f"{name} Classification"] = row['Classification']
 
-            replace_placeholders(template_doc, lookup)
-            superscript_suffixes(template_doc)
-            delete_rows_with_dash(template_doc)
-            delete_rows_with_unfilled_placeholders(template_doc)
-            highlight_unfilled_placeholders(template_doc)
-
+            # === Process WISC Tables ===
             input_wisc_doc = Document(uploaded_wisc)
-            wisc_template = Document("wisc_template.docx")
             wisc_combined = pd.DataFrame()
 
             for i, table in enumerate(input_wisc_doc.tables):
@@ -378,30 +356,26 @@ with tab5:
                 wisc_combined["Percentile*"] = wisc_combined["Percentile"].apply(format_percentile_with_suffix)
                 wisc_combined = wisc_combined.replace("-", "#")
 
-            wisc_lookup = {}
-            for _, row in wisc_combined.iterrows():
-                name = row['Name'].strip()
-                wisc_lookup[f"{name} Classification"] = row['Classification']
-                wisc_lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
-                wisc_lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
+                for _, row in wisc_combined.iterrows():
+                    name = row['Name'].strip()
+                    lookup[f"{name} Classification"] = row['Classification']
+                    lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
+                    lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
-            replace_placeholders(wisc_template, wisc_lookup)
-            superscript_suffixes(wisc_template)
-            delete_rows_with_dash(wisc_template)
-            delete_rows_with_unfilled_placeholders(wisc_template)
-            highlight_unfilled_placeholders(wisc_template)
-
-            for element in wisc_template.element.body:
-                template_doc.element.body.append(element)
+            replace_placeholders(template_doc, lookup)
+            superscript_suffixes(template_doc)
+            delete_rows_with_dash(template_doc)
+            delete_rows_with_unfilled_placeholders(template_doc)
+            highlight_unfilled_placeholders(template_doc)
 
             output = BytesIO()
             template_doc.save(output)
             output.seek(0)
 
-            st.success("✅ Combined document generated successfully!")
+            st.success("\u2705 Combined document generated successfully!")
 
             st.download_button(
-                label="📥 Download Combined Report",
+                label="\U0001F4E5 Download Combined Report",
                 data=output,
                 file_name="combined_report.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
