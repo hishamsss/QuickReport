@@ -223,7 +223,7 @@ def highlight_unfilled_placeholders(doc):
 
 # === Streamlit App ===
 
-st.title("📄 WIAT-4 and WISC Report Combiner")
+st.title("📄 Report Writer")
 
 tab1, tab2, tab3, tab4 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery"])
 
