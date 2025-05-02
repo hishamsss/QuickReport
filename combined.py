@@ -255,7 +255,7 @@ with tab4:
         beery_df["Percentile*"] = beery_df["Percentile"].apply(format_percentile_with_suffix)
         beery_df = beery_df.replace("-", "#")
 
-        st.dataframe(beery_df[["Name", "Percentile", "Percentile*", "Classification"]], use_container_width=True)
+        #st.dataframe(beery_df[["Name", "Percentile", "Percentile*", "Classification"]], use_container_width=True)
         
 with tab5:
     if uploaded_doc and uploaded_wisc:
