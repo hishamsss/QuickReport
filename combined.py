@@ -309,6 +309,7 @@ with tab5:
                 lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                 lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
+            # === Beery
             if vmi:
                 lookup["VMI Percentile"] = vmi
                 lookup["VMI Percentile*"] = format_percentile_with_suffix(vmi)
@@ -322,6 +323,7 @@ with tab5:
                 lookup["MC Percentile*"] = format_percentile_with_suffix(mc)
                 lookup["MC Classification"] = classify(mc)
 
+            # === ChAMP
             if not champ_df.empty:
                 for _, row in champ_df.iterrows():
                     name = row['Name'].strip()
@@ -329,7 +331,7 @@ with tab5:
                     lookup[f"{name} Percentile*"] = row['Percentile*']
                     lookup[f"{name} Classification"] = row['Classification']
 
-            # === Process WISC Tables ===
+            # === WISC
             input_wisc_doc = Document(uploaded_wisc)
             wisc_combined = pd.DataFrame()
 
@@ -362,6 +364,7 @@ with tab5:
                     lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                     lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
+            # === Fill and output unified report
             replace_placeholders(template_doc, lookup)
             superscript_suffixes(template_doc)
             delete_rows_with_dash(template_doc)
@@ -372,10 +375,10 @@ with tab5:
             template_doc.save(output)
             output.seek(0)
 
-            st.success("\u2705 Combined document generated successfully!")
+            st.success("✅ Combined document generated successfully!")
 
             st.download_button(
-                label="\U0001F4E5 Download Combined Report",
+                label="📥 Download Combined Report",
                 data=output,
                 file_name="combined_report.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
