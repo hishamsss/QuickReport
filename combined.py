@@ -279,23 +279,20 @@ with tab5:
             template_doc = Document(template_path)
 
             # === Process WIAT Tables ===
-            target_table_indices = [2, 3, 4, 5, 6, 7, 8, 9, 10]
             ae_combined = pd.DataFrame()
 
-            for i in target_table_indices:
-                if i < len(input_doc.tables):
-                    table = input_doc.tables[i]
-                    data = [[cell.text.strip() for cell in row.cells] for row in table.rows]
-                    df = pd.DataFrame(data)
-                    if df.shape[0] > 1:
-                        df.columns = df.iloc[0]
-                        df = df.drop(index=0).reset_index(drop=True)
-                    if df.shape[1] >= 5:
-                        ae_df = df.iloc[:, [0, 4]].copy()
-                        ae_df.columns = ['Name', 'Percentile']
-                        ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
-                        ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
-
+            for i, table in enumerate(input_doc.tables):
+                data = [[cell.text.strip() for cell in row.cells] for row in table.rows]
+                df = pd.DataFrame(data)
+                if df.shape[0] > 1:
+                    df.columns = df.iloc[0]
+                    df = df.drop(index=0).reset_index(drop=True)
+                if df.shape[1] >= 5:
+                    ae_df = df.iloc[:, [0, 4]].copy()
+                    ae_df.columns = ['Name', 'Percentile']
+                    ae_df['Name'] = ae_df['Name'].str.replace(r'[^A-Za-z\s]', '', regex=True).str.strip()
+                    ae_combined = pd.concat([ae_combined, ae_df], ignore_index=True)
+                    
             if not ae_combined.empty:
                 ae_combined.drop_duplicates(subset='Name', inplace=True)
                 ae_combined["Classification"] = ae_combined["Percentile"].apply(classify)
