@@ -303,6 +303,8 @@ if uploaded_doc and uploaded_wisc:
                 if df.shape[1] >= 5:
                     if i == 5:  # Table 6 (0-indexed)
                         ae_df = df.iloc[:, [1, 4]].copy()
+                    elif i == 15:  # Table 16 (0-indexed)
+                        ae_df = df.iloc[:, [1, 4]].copy()
                     elif df.shape[1] >= 6:
                         ae_df = df.iloc[:, [1, 5]].copy()
                     else:
