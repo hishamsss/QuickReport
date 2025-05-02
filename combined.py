@@ -237,8 +237,26 @@ with tab3:
     st.info("🔧 ChAMP integration coming soon...")
 
 with tab4:
-    st.info("🔧 Beery integration coming soon...")
+    st.subheader("✍️ Enter Beery Scores")
 
+    vmi = st.text_input("Visual-Motor Integration (VMI) Percentile", key="vmi_input")
+    vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
+    mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
+
+    # Optionally format and preview the classified values
+    if vmi or vp or mc:
+        beery_df = pd.DataFrame([
+            {"Name": "VMI", "Percentile": vmi},
+            {"Name": "VP", "Percentile": vp},
+            {"Name": "MC", "Percentile": mc},
+        ])
+
+        beery_df["Classification"] = beery_df["Percentile"].apply(classify)
+        beery_df["Percentile*"] = beery_df["Percentile"].apply(format_percentile_with_suffix)
+        beery_df = beery_df.replace("-", "#")
+
+        st.dataframe(beery_df[["Name", "Percentile", "Percentile*", "Classification"]], use_container_width=True)
+        
 with tab5:
     if uploaded_doc and uploaded_wisc:
         gender_selection = st.radio(
@@ -281,6 +299,19 @@ with tab5:
                 lookup[f"{name} Classification"] = row['Classification']
                 lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                 lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
+
+            if vmi:
+                lookup["VMI Percentile"] = vmi
+                lookup["VMI Percentile*"] = format_percentile_with_suffix(vmi)
+                lookup["VMI Classification"] = classify(vmi)
+            if vp:
+                lookup["VP Percentile"] = vp
+                lookup["VP Percentile*"] = format_percentile_with_suffix(vp)
+                lookup["VP Classification"] = classify(vp)
+            if mc:
+                lookup["MC Percentile"] = mc
+                lookup["MC Percentile*"] = format_percentile_with_suffix(mc)
+                lookup["MC Classification"] = classify(mc)
 
             replace_placeholders(template_doc, lookup)
             superscript_suffixes(template_doc)
