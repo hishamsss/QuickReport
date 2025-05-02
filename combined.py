@@ -225,8 +225,20 @@ def highlight_unfilled_placeholders(doc):
 
 st.title("📄 WIAT-4 and WISC Report Combiner")
 
-uploaded_doc = st.file_uploader("Upload WIAT-4 Report (.docx)", type="docx")
-uploaded_wisc = st.file_uploader("Upload WISC Report (.docx)", type="docx")
+tab1, tab2, tab3, tab4 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery"])
+
+with tab1:
+    uploaded_doc = st.file_uploader("📄 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
+
+with tab2:
+    uploaded_wisc = st.file_uploader("🧠 Upload WISC Report (.docx)", type="docx", key="wisc_upload")
+
+with tab3:
+    st.info("🔧 ChAMP integration coming soon...")
+
+with tab4:
+    st.info("🔧 Beery integration coming soon...")
+
 
 if uploaded_doc and uploaded_wisc:
     gender_selection = st.radio(
