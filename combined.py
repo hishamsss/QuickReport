@@ -379,7 +379,7 @@ with tab5:
                     cells = row.cells
                     if len(cells) >= 4:
                         subtest_name = cells[0].text.strip()
-                        sw_indicator = cells[3].text.strip()
+                        sw_indicator = cells[5].text.strip()
                         key = f"{subtest_name} SW"
                         sw_lookup[key] = interpret_sw(sw_indicator, child_name)
             except IndexError:
