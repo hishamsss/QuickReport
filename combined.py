@@ -361,7 +361,32 @@ with tab5:
                     lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                     lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
 
+            def interpret_sw(value, name):
+                if value == "S":
+                    return f"This was a personal strength for {name}."
+                elif value == "W":
+                    return f"This was a personal weakness for {name}."
+                else:
+                    return ""
+            
+            # === Extract WISC SW Values from Table 6 ===
+            wisc_table_index = 5  # Table 6 is at index 5
+            sw_lookup = {}
+            
+            try:
+                wisc_table = doc.tables[wisc_table_index]
+                for row in wisc_table.rows[1:]:  # skip header row
+                    cells = row.cells
+                    if len(cells) >= 4:
+                        subtest_name = cells[0].text.strip()
+                        sw_indicator = cells[3].text.strip()
+                        key = f"{subtest_name} SW"
+                        sw_lookup[key] = interpret_sw(sw_indicator, child_name)
+            except IndexError:
+                print("WISC Table 6 not found or malformed")
+
             # === Fill and output unified report
+            lookup.update(sw_lookup)
             replace_placeholders(template_doc, lookup)
             superscript_suffixes(template_doc)
             delete_rows_with_dash(template_doc)
