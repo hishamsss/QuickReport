@@ -374,7 +374,17 @@ with tab5:
             sw_lookup = {}
             
             try:
-                wisc_table = doc.tables[wisc_table_index]
+                if len(doc.tables) > wisc_table_index:
+                    wisc_table = doc.tables[wisc_table_index]
+                    for row in wisc_table.rows[1:]:
+                        cells = row.cells
+                        if len(cells) >= 4:
+                            subtest_name = cells[0].text.strip()
+                            sw_indicator = cells[3].text.strip()
+                            key = f"{subtest_name} SW"
+                            sw_lookup[key] = interpret_sw(sw_indicator, child_name)
+                else:
+                    print(f"WISC table at index {wisc_table_index} not found.")
                 for row in wisc_table.rows[1:]:  # skip header row
                     cells = row.cells
                     if len(cells) >= 4:
