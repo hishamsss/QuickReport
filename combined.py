@@ -360,46 +360,9 @@ with tab5:
                     lookup[f"{name} Classification"] = row['Classification']
                     lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                     lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
-
-            def interpret_sw(value, name):
-                if value == "S":
-                    return f"This was a personal strength for {name}."
-                elif value == "W":
-                    return f"This was a personal weakness for {name}."
-                else:
-                    return ""
             
-            # === Extract WISC SW Values from Table 6 ===
-           wisc_table_index = 5  # Table 6 (0-based index)
-            
-            sw_lookup = {}
-            
-            def interpret_sw(value, name):
-                if value == "S":
-                    return f"This was a personal strength for {name}."
-                elif value == "W":
-                    return f"This was a personal weakness for {name}."
-                else:
-                    return ""
-            
-            # Ensure `doc` is loaded (should be the source document, not the template)
-            if 'doc' in locals() and hasattr(doc, 'tables'):
-                if len(doc.tables) > wisc_table_index:
-                    wisc_table = doc.tables[wisc_table_index]
-                    for row in wisc_table.rows[1:]:
-                        cells = row.cells
-                        if len(cells) >= 4:
-                            subtest_name = cells[0].text.strip()
-                            sw_indicator = cells[3].text.strip()
-                            key = f"{subtest_name} SW"
-                            sw_lookup[key] = interpret_sw(sw_indicator, child_name)
-                else:
-                    print(f"[WARN] Table index {wisc_table_index} not found in document.")
-            else:
-                print("[ERROR] 'doc' is not defined or does not contain tables.")
 
             # === Fill and output unified report
-            lookup.update(sw_lookup)
             replace_placeholders(template_doc, lookup)
             superscript_suffixes(template_doc)
             delete_rows_with_dash(template_doc)
