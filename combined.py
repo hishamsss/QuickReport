@@ -224,7 +224,7 @@ def highlight_unfilled_placeholders(doc):
 
 st.title("\U0001F4C4 Report Writer")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "Finalize"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "CBRS", "Finalize"])
 
 with tab1:
     uploaded_doc = st.file_uploader("\U0001F4C4 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
@@ -296,6 +296,48 @@ with tab4:
         mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
         
 with tab5:
+    st.subheader("CBRS")
+
+    cbrs_options = [
+        "Academic",
+        "Inattention/Hyperactivity",
+        "Impulsivity",
+        "Oppositional and Aggressive Behaviors",
+        "Mood",
+        "Anxiety",
+    ]
+
+    st.markdown("### Parent")
+    st.multiselect(
+        "Behavior Scales",
+        cbrs_options,
+        key="parent_behavior_scales",
+    )
+    st.text_input("Additional Problems", key="parent_additional_problems")
+    st.text_input("Additional Comments", key="parent_additional_comments")
+    st.text_input("Strengths", key="parent_strengths")
+
+    st.markdown("### Teacher")
+    st.multiselect(
+        "Behavior Scales",
+        cbrs_options,
+        key="teacher_behavior_scales",
+    )
+    st.text_input("Additional Problems", key="teacher_additional_problems")
+    st.text_input("Additional Comments", key="teacher_additional_comments")
+    st.text_input("Strengths", key="teacher_strengths")
+
+    st.markdown("### Self-Report")
+    st.multiselect(
+        "Behavior Scales",
+        cbrs_options,
+        key="self_report_behavior_scales",
+    )
+    st.text_input("Additional Problems", key="self_report_additional_problems")
+    st.text_input("Additional Comments", key="self_report_additional_comments")
+    st.text_input("Strengths", key="self_report_strengths")
+
+with tab6:
     st.subheader("Report Settings")
 
     # 1) Always-visible fields:
@@ -425,6 +467,30 @@ with tab5:
                     lookup[f"{name} Percentile"] = str(row['Percentile']).strip()
                     lookup[f"{name} Percentile*"] = str(row['Percentile*']).strip()
             
+
+            # === CBRS
+            def combine_scales(key):
+                items = st.session_state.get(key, [])
+                return ", ".join(items) + "." if items else ""
+
+            cbrs_sections = [
+                ("Parent", "parent"),
+                ("Teacher", "teacher"),
+                ("Self-Report", "self_report"),
+            ]
+
+            for label, prefix in cbrs_sections:
+                scales = combine_scales(f"{prefix}_behavior_scales")
+                if scales:
+                    lookup[f"CBRS {label} Behavior Scales"] = scales
+                for field_label, field_key in [
+                    ("Additional Problems", "additional_problems"),
+                    ("Additional Comments", "additional_comments"),
+                    ("Strengths", "strengths"),
+                ]:
+                    value = st.session_state.get(f"{prefix}_{field_key}", "")
+                    if value:
+                        lookup[f"CBRS {label} {field_label}"] = value
 
             # === Fill and output unified report
             replace_placeholders(template_doc, lookup)
