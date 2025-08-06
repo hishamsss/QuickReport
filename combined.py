@@ -397,17 +397,18 @@ with tab5:
 
             output = BytesIO()
             template_doc.save(output)
-            output.seek(0)
-
+            st.session_state["generated_report"] = output.getvalue()
             st.success("✅ Combined document generated successfully!")
 
+        if st.session_state.get("generated_report"):
+            output_data = BytesIO(st.session_state["generated_report"])
             final_name = report_name_input.strip() or "combined_report"
             if not final_name.lower().endswith(".docx"):
                 final_name += ".docx"
 
             st.download_button(
                 label="📥 Download Combined Report",
-                data=output,
+                data=output_data,
                 file_name=final_name,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
