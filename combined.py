@@ -244,12 +244,28 @@ with tab3:
     ]
 
     champ_data = []
+    champ_trends = {}
     for field in champ_fields:
-        col1, col2 = st.columns([1.5, 1.5])
-        with col1:
-            st.markdown(f"**{field}**")
-        with col2:
-            value = st.text_input("", key=f"champ_{field}")
+        if field in ["Lists", "Objects", "Instructions", "Places"]:
+            col1, col2, col3 = st.columns([1.5, 1.5, 1.5])
+            with col1:
+                st.markdown(f"**{field}**")
+            with col2:
+                value = st.text_input("", key=f"champ_{field}")
+            with col3:
+                trend = st.selectbox(
+                    "",
+                    ["Increased", "Decreased", "Stayed the same"],
+                    index=2,
+                    key=f"champ_{field}_change",
+                )
+            champ_trends[field] = trend
+        else:
+            col1, col2 = st.columns([1.5, 1.5])
+            with col1:
+                st.markdown(f"**{field}**")
+            with col2:
+                value = st.text_input("", key=f"champ_{field}")
         champ_data.append({"Name": field, "Percentile": value})
 
     champ_df = pd.DataFrame(champ_data)
@@ -372,6 +388,9 @@ with tab5:
                     lookup[f"{name} Percentile"] = row['Percentile']
                     lookup[f"{name} Percentile*"] = row['Percentile*']
                     lookup[f"{name} Classification"] = row['Classification']
+            if champ_trends:
+                for name, trend in champ_trends.items():
+                    lookup[f"{name} Change"] = trend
 
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
