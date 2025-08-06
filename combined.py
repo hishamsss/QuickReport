@@ -261,9 +261,23 @@ with tab3:
 with tab4:
     st.subheader("✍️ Enter Beery Scores")
 
-    vmi = st.text_input("Visual-Motor Integration (VMI) Percentile", key="vmi_input")
-    vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
-    mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
+    col1, col2 = st.columns(2)
+    with col1:
+        vmi = st.text_input("Visual-Motor Integration (VMI) Percentile", key="vmi_input")
+    with col2:
+        vmi_raw = st.text_input("VMI Raw Score", key="vmi_raw_input")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
+    with col2:
+        vp_raw = st.text_input("VP Raw Score", key="vp_raw_input")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
+    with col2:
+        mc_raw = st.text_input("MC Raw Score", key="mc_raw_input")
 
 with tab5:
     if uploaded_doc and uploaded_wisc:
@@ -311,14 +325,20 @@ with tab5:
                 lookup["VMI Percentile"] = vmi
                 lookup["VMI Percentile*"] = format_percentile_with_suffix(vmi)
                 lookup["VMI Classification"] = classify(vmi)
+            if vmi_raw:
+                lookup["VMI Raw Score"] = vmi_raw
             if vp:
                 lookup["VP Percentile"] = vp
                 lookup["VP Percentile*"] = format_percentile_with_suffix(vp)
                 lookup["VP Classification"] = classify(vp)
+            if vp_raw:
+                lookup["VP Raw Score"] = vp_raw
             if mc:
                 lookup["MC Percentile"] = mc
                 lookup["MC Percentile*"] = format_percentile_with_suffix(mc)
                 lookup["MC Classification"] = classify(mc)
+            if mc_raw:
+                lookup["MC Raw Score"] = mc_raw
 
             # === ChAMP
             if not champ_df.empty:
