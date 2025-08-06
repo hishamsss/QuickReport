@@ -222,9 +222,9 @@ def highlight_unfilled_placeholders(doc):
 
 # === Streamlit App ===
 
-st.title("\U0001F4C4 Breh Report Writer")
+st.title("\U0001F4C4 Report Writer")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT Brew", "WISC", "ChAMP", "Beery", "Finalize"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "Finalize"])
 
 with tab1:
     uploaded_doc = st.file_uploader("\U0001F4C4 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
@@ -280,7 +280,7 @@ with tab4:
         mc_raw = st.text_input("MC Raw Score", key="mc_raw_input")
 
 with tab5:
-    st.subheader("👤 Report Settings")
+    st.subheader("Report Settings")
 
     # 1) Always-visible fields:
     report_name_input = st.text_input(
