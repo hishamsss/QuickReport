@@ -279,22 +279,22 @@ with tab4:
 
     col1, col2 = st.columns(2)
     with col1:
-        vmi = st.text_input("Visual-Motor Integration (VMI) Percentile", key="vmi_input")
-    with col2:
         vmi_raw = st.text_input("VMI Raw Score", key="vmi_raw_input")
+    with col2:
+        vmi = st.text_input("Visual-Motor Integration (VMI) Percentile", key="vmi_input")
 
     col1, col2 = st.columns(2)
     with col1:
-        vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
-    with col2:
         vp_raw = st.text_input("VP Raw Score", key="vp_raw_input")
-
+    with col2:
+        vp = st.text_input("Visual Perception (VP) Percentile", key="vp_input")
+        
     col1, col2 = st.columns(2)
     with col1:
-        mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
-    with col2:
         mc_raw = st.text_input("MC Raw Score", key="mc_raw_input")
-
+    with col2:
+        mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
+        
 with tab5:
     st.subheader("Report Settings")
 
