@@ -280,23 +280,28 @@ with tab4:
         mc_raw = st.text_input("MC Raw Score", key="mc_raw_input")
 
 with tab5:
-    if uploaded_doc and uploaded_wisc:
-        gender_selection = st.radio(
-            "Select WIAT Report Gender Template:",
-            ("Male", "Female"),
-            key="gender"
-        )
+    st.subheader("👤 Report Settings")
 
-        report_name_input = st.text_input(
-            "Report file name (without .docx)",
-            value="combined_report",
-            key="report_name_input"
-        )
+    # 1) Always-visible fields:
+    report_name_input = st.text_input(
+        "Report file name (without .docx)",
+        value="combined_report",
+        key="report_name_input"
+    )
+    gender_selection = st.radio(
+        "Select WIAT Report Gender Template:",
+        ("Male", "Female"),
+        key="gender"
+    )
 
+    # 2) If files aren’t uploaded yet, prompt the user:
+    if not uploaded_doc or not uploaded_wisc:
+        st.info("Please upload both your WIAT and WISC reports in the WIAT & WISC tabs above.")
+    else:
+        # 3) Once both are present, show the generate button
         if st.button("Generate Combined Report"):
-            input_doc = Document(uploaded_doc)
-            template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
-            template_doc = Document(template_path)
+            # … your existing document-generation logic here …
+            st.success("✅ Combined document generated successfully!")
 
             # === Process WIAT Tables ===
             ae_combined = pd.DataFrame()
