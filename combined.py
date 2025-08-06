@@ -417,7 +417,7 @@ with tab5:
             output = BytesIO()
             template_doc.save(output)
             st.session_state["generated_report"] = output.getvalue()
-            st.success("✅ Combined document generated successfully!")
+            
 
         if st.session_state.get("generated_report"):
             output_data = BytesIO(st.session_state["generated_report"])
