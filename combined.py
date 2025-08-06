@@ -224,7 +224,7 @@ def highlight_unfilled_placeholders(doc):
 
 st.title("\U0001F4C4 Breh Report Writer")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "Finalize"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["WIAT Brew", "WISC", "ChAMP", "Beery", "Finalize"])
 
 with tab1:
     uploaded_doc = st.file_uploader("\U0001F4C4 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
