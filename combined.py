@@ -287,6 +287,12 @@ with tab5:
             key="gender"
         )
 
+        report_name_input = st.text_input(
+            "Report file name (without .docx)",
+            value="combined_report",
+            key="report_name_input"
+        )
+
         if st.button("Generate Combined Report"):
             input_doc = Document(uploaded_doc)
             template_path = "template_male.docx" if gender_selection == "Male" else "template_female.docx"
@@ -395,9 +401,13 @@ with tab5:
 
             st.success("✅ Combined document generated successfully!")
 
+            final_name = report_name_input.strip() or "combined_report"
+            if not final_name.lower().endswith(".docx"):
+                final_name += ".docx"
+
             st.download_button(
                 label="📥 Download Combined Report",
                 data=output,
-                file_name="combined_report.docx",
+                file_name=final_name,
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
