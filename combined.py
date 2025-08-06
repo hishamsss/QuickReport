@@ -287,8 +287,7 @@ with tab5:
         "Report file name (without .docx)",
         value="combined_report",
         key="report_name_input"
-    )
-    st.write("👀 I’m here!")  
+    )  
     gender_selection = st.radio(
         "Select WIAT Report Gender Template:",
         ("Male", "Female"),
