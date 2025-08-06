@@ -301,6 +301,20 @@ with tab5:
         # 3) Once both are present, show the generate button
         if st.button("Generate Combined Report"):
             # … your existing document-generation logic here …
+            input_doc    = Document(uploaded_doc)
+            template_path = (
+                "template_male.docx"
+                if gender_selection == "Male"
+                else "template_female.docx"
+            )
+            template_doc = Document(template_path)
+        
+            # 2) (Now your existing AE‐table loops, placeholder‐replacing, superscripting, etc.)
+        
+            # 3) Save into bytes
+            output = BytesIO()
+            template_doc.save(output)
+            st.session_state["generated_report"] = output.getvalue()            
             st.success("✅ Combined document generated successfully!")
 
             # === Process WIAT Tables ===
