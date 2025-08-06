@@ -255,7 +255,7 @@ with tab3:
             with col3:
                 trend = st.selectbox(
                     "",
-                    ["imporved", "decreased", "stayed the same"],
+                    ["improved", "decreased", "stayed the same"],
                     index=2,
                     key=f"champ_{field}_change",
                 )
