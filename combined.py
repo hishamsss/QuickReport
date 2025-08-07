@@ -72,8 +72,6 @@ def format_percentile_with_suffix(percentile):
         return f"{percentile}{suffix}"
 
 def replace_placeholders(doc, lookup):
-    cefi_pattern = re.compile(r"\{\{CEFI[^}]*\}\}")
-
     def replace_in_runs(runs, lookup):
         n = len(runs)
         i = 0
@@ -92,14 +90,6 @@ def replace_placeholders(doc, lookup):
                         found = True
                         break
                 if found:
-                    break
-                match = cefi_pattern.search(combined_text)
-                if match:
-                    new_text = cefi_pattern.sub("-", combined_text)
-                    runs[i].text = new_text
-                    for k in range(i + 1, j + 1):
-                        runs[k].text = ''
-                    found = True
                     break
             i = j + 1 if found else i + 1
 
