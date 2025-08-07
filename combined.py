@@ -322,7 +322,8 @@ with tab5:
             st.session_state["cefi_df"] = cefi_df
             st.dataframe(cefi_df)
         except Exception as e:
-            st.error("Error processing CEFI PDF")
+            st.error(f"Error processing CEFI PDF: {e}")
+            st.exception(e)
 
 with tab6:
     st.subheader("CBRS")
