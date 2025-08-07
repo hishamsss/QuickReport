@@ -83,13 +83,15 @@ def replace_placeholders(doc, lookup):
 
     def replace_in_runs(runs, lookup):
         pattern = re.compile(r"{{(.*?)}}")
+        def _norm_key(k: str) -> str:
+            return re.sub(r"\s+", " ", k.strip())
         search_start = 0
         while True:
             full_text = "".join(run.text for run in runs)
             match = pattern.search(full_text, search_start)
             if not match:
                 break
-            key = match.group(1)
+            key = _norm_key(match.group(1))
             if key not in lookup:
                 search_start = match.end()
                 continue
@@ -594,6 +596,13 @@ with tab7:
                 _prefill_missing_cefi_channel(lookup, "Teacher", all_cefi_scales)
             if cefi_df.empty and (not cefi_teacher_df.empty):
                 _prefill_missing_cefi_channel(lookup, "Parent", all_cefi_scales)
+
+            if not cefi_df.empty and not cefi_teacher_df.empty:
+                lookup["CEFI Heading"] = "CEFI Parent & Teacher"
+            elif not cefi_df.empty:
+                lookup["CEFI Heading"] = "CEFI Parent"
+            elif not cefi_teacher_df.empty:
+                lookup["CEFI Heading"] = "CEFI Teacher"
                 
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
@@ -654,6 +663,7 @@ with tab7:
                         lookup[f"CBRS {label} {field_label}"] = value
 
             # === Fill and output unified report
+            lookup = {re.sub(r"\s+", " ", k.strip()): v for k, v in lookup.items()}
             replace_placeholders(template_doc, lookup)
             superscript_suffixes(template_doc)
             delete_rows_with_dash(template_doc)
