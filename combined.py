@@ -305,6 +305,10 @@ with tab5:
         "Oppositional and Aggressive Behaviors",
         "Mood",
         "Anxiety",
+        "Emotional Distress",
+        "Social Skills",
+        "Physical Symptoms",
+        "Other Atypical Behaviors and Social Problems",
     ]
 
     st.markdown("### Parent")
