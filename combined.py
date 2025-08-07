@@ -83,11 +83,9 @@ def replace_placeholders(doc, lookup):
                     placeholder = f"{{{{{key}}}}}"
                     if placeholder in combined_text:
                         new_text = combined_text.replace(placeholder, value)
-                        idx = 0
-                        for k in range(i, j + 1):
-                            run_length = len(runs[k].text)
-                            runs[k].text = new_text[idx:idx+run_length]
-                            idx += run_length
+                        runs[i].text = new_text
+                        for k in range(i + 1, j + 1):
+                            runs[k].text = ''
                         found = True
                         break
                 if found:
