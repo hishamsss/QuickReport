@@ -317,6 +317,7 @@ with tab5:
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
             cefi_df = cefi_df.replace("-", "#")
+            st.session_state["cefi_df"] = cefi_df
             st.dataframe(cefi_df)
         except Exception as e:
             st.error("Error processing CEFI PDF")
@@ -464,6 +465,7 @@ with tab7:
                 for name, trend in champ_trends.items():
                     lookup[f"{name} Change"] = trend
 
+            cefi_df = st.session_state.get("cefi_df", pd.DataFrame())
             # === CEFI
             if not cefi_df.empty:
                 for _, row in cefi_df.iterrows():
