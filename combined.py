@@ -354,9 +354,9 @@ with tab5:
     )
     
     def _norm_scale(s: str) -> str:
-    s = re.sub(r'[^A-Za-z ]', '', str(s))   # letters + spaces only
-    s = re.sub(r'\s+', ' ', s).strip()      # collapse spaces
-    return s
+        s = re.sub(r'[^A-Za-z ]', '', str(s))   # letters + spaces only
+        s = re.sub(r'\s+', ' ', s).strip()      # collapse spaces
+        return s
             
     cefi_df = pd.DataFrame()
     if uploaded_cefi_parent:
