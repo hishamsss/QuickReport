@@ -319,7 +319,8 @@ with tab5:
             cefi_df = cefi_df.replace("-", "#")
             st.dataframe(cefi_df)
         except Exception as e:
-            st.error("Error processing CEFI PDF")
+            st.error(f"Error processing CEFI PDF: {e}")
+            st.exception(e)
 
 with tab6:
     st.subheader("CBRS")
