@@ -304,6 +304,7 @@ with tab5:
             with pdfplumber.open(uploaded_cefi) as pdf:
                 table = pdf.pages[2].extract_tables()[0]
             df = pd.DataFrame(table)
+            st.write("Initial shape:", df.shape)
             valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
             df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
             if df.shape[1] > 4:
@@ -314,6 +315,7 @@ with tab5:
             df = df.drop(columns=valid_col_drops).reset_index(drop=True)
             cefi_df = df.copy()
             cefi_df.columns = ["Scale", "Percentile", "SW"]
+            st.write("Final shape:", cefi_df.shape)
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
             cefi_df = cefi_df.replace("-", "#")
