@@ -364,8 +364,8 @@ with tab5:
     if uploaded_cefi_parent:
         try:
             with pdfplumber.open(uploaded_cefi_parent) as pdf:
-                table = pdf.pages[2].extract_tables()[0]
-            df = pd.DataFrame(table)
+                tables = pdf.pages[2].extract_tables()
+            df = pd.concat([pd.DataFrame(tbl) for tbl in tables], ignore_index=True)
             st.write("Parent initial shape:", df.shape)
             valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
             df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
@@ -380,6 +380,7 @@ with tab5:
             cefi_df["Scale"] = cefi_df["Scale"].apply(_norm_scale)
             cefi_df["SW"] = cefi_df["SW"].replace({"None": "N/A"}).fillna("N/A")
             st.write("Parent final shape:", cefi_df.shape)
+            st.write("Parent scales:", cefi_df["Scale"])
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
             st.session_state["cefi_df"] = cefi_df
@@ -392,8 +393,8 @@ with tab5:
     if uploaded_cefi_teacher:
         try:
             with pdfplumber.open(uploaded_cefi_teacher) as pdf:
-                table = pdf.pages[2].extract_tables()[0]
-            df = pd.DataFrame(table)
+                tables = pdf.pages[2].extract_tables()
+            df = pd.concat([pd.DataFrame(tbl) for tbl in tables], ignore_index=True)
             st.write("Teacher initial shape:", df.shape)
             valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
             df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
@@ -408,6 +409,7 @@ with tab5:
             cefi_teacher_df["Scale"] = cefi_teacher_df["Scale"].apply(_norm_scale)
             cefi_teacher_df["SW"] = cefi_teacher_df["SW"].replace({"None": "N/A"}).fillna("N/A")
             st.write("Teacher final shape:", cefi_teacher_df.shape)
+            st.write("Teacher scales:", cefi_teacher_df["Scale"])
             cefi_teacher_df["Classification"] = cefi_teacher_df["Percentile"].apply(classify)
             cefi_teacher_df["Percentile*"] = cefi_teacher_df["Percentile"].apply(format_percentile_with_suffix)
             st.session_state["cefi_teacher_df"] = cefi_teacher_df
@@ -561,6 +563,10 @@ with tab7:
 
             cefi_df = st.session_state.get("cefi_df", pd.DataFrame())
             cefi_teacher_df = st.session_state.get("cefi_teacher_df", pd.DataFrame())
+            if not cefi_df.empty:
+                st.write("Final parent scales:", cefi_df["Scale"])
+            if not cefi_teacher_df.empty:
+                st.write("Final teacher scales:", cefi_teacher_df["Scale"])
             # === CEFI Parent
             if not cefi_df.empty:
                 for _, row in cefi_df.iterrows():
