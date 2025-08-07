@@ -517,6 +517,23 @@ with tab7:
                     lookup[f"CEFI Teacher {scale} Percentile"]      = str(row['Percentile']).strip()
                     lookup[f"CEFI Teacher {scale} Percentile*"]     = str(row['Percentile*']).strip()
                     lookup[f"CEFI Teacher {scale} SW"]              = str(row['SW']).strip()
+            
+            cefi_heading = ""
+            if not cefi_df.empty and not cefi_teacher_df.empty:
+                cefi_heading = (
+                    "The percentiles for the parent and teacher rating scales are presented in the table that follows for comparison."
+                )
+            elif not cefi_df.empty:
+                cefi_heading = (
+                    "The percentiles for the parent rating scales are presented in the table that follows:"
+                )
+            elif not cefi_teacher_df.empty:
+                cefi_heading = (
+                    "The percentiles for the teacher rating scales are presented in the table that follows:"
+                )
+            if cefi_heading:
+                lookup["CEFI Heading"] = cefi_heading
+                
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
             wisc_combined = pd.DataFrame()
