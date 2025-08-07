@@ -476,7 +476,7 @@ with tab7:
                     lookup[f"CEFI {scale} Classification"] = row['Classification']
                     lookup[f"CEFI {scale} Percentile"] = str(row['Percentile']).strip()
                     lookup[f"CEFI {scale} Percentile*"] = str(row['Percentile*']).strip()
-
+                    lookup[f"CEFI {scale} SW"] = str(row['SW']).strip()  
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
             wisc_combined = pd.DataFrame()
