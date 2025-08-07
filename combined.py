@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import pdfplumber
 import re
 from docx import Document
 from io import BytesIO
@@ -222,7 +223,7 @@ def highlight_unfilled_placeholders(doc):
 
 st.title("\U0001F4C4 Report Writer")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "CBRS", "Finalize"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["WIAT", "WISC", "ChAMP", "Beery", "CEFI", "CBRS", "Finalize"])
 
 with tab1:
     uploaded_doc = st.file_uploader("\U0001F4C4 Upload WIAT-4 Report (.docx)", type="docx", key="wiat_upload")
@@ -292,8 +293,35 @@ with tab4:
         mc_raw = st.text_input("MC Raw Score", key="mc_raw_input")
     with col2:
         mc = st.text_input("Motor Coordination (MC) Percentile", key="mc_input")
-        
+
 with tab5:
+    st.subheader("CEFI")
+
+    uploaded_cefi = st.file_uploader("Upload CEFI Report (.pdf)", type="pdf", key="cefi_upload")
+    cefi_df = pd.DataFrame()
+    if uploaded_cefi:
+        try:
+            with pdfplumber.open(uploaded_cefi) as pdf:
+                table = pdf.pages[2].extract_tables()[0]
+            df = pd.DataFrame(table)
+            valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
+            df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
+            if df.shape[1] > 4:
+                df.iat[0, 3] = df.iat[0, 4]
+                df.iat[0, 4] = ""
+            df.iat[0, 0] = "Total"
+            valid_col_drops = [c for c in [1, 2, 4, 5, 6] if c in df.columns]
+            df = df.drop(columns=valid_col_drops).reset_index(drop=True)
+            cefi_df = df.copy()
+            cefi_df.columns = ["Scale", "Percentile", "SW"]
+            cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
+            cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
+            cefi_df = cefi_df.replace("-", "#")
+            st.dataframe(cefi_df)
+        except Exception as e:
+            st.error("Error processing CEFI PDF")
+
+with tab6:
     st.subheader("CBRS")
 
     cbrs_options = [
@@ -339,7 +367,7 @@ with tab5:
     st.text_input("Additional Comments", key="self_report_additional_comments")
     st.text_input("Strengths", key="self_report_strengths")
 
-with tab6:
+with tab7:
     st.subheader("Report Settings")
 
     # 1) Always-visible fields:
@@ -435,6 +463,14 @@ with tab6:
             if champ_trends:
                 for name, trend in champ_trends.items():
                     lookup[f"{name} Change"] = trend
+
+            # === CEFI
+            if not cefi_df.empty:
+                for _, row in cefi_df.iterrows():
+                    scale = row['Scale'].strip()
+                    lookup[f"CEFI {scale} Classification"] = row['Classification']
+                    lookup[f"CEFI {scale} Percentile"] = str(row['Percentile']).strip()
+                    lookup[f"CEFI {scale} Percentile*"] = str(row['Percentile*']).strip()
 
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
