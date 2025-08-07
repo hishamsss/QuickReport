@@ -297,14 +297,20 @@ with tab4:
 with tab5:
     st.subheader("CEFI")
 
-    uploaded_cefi = st.file_uploader("Upload CEFI Report (.pdf)", type="pdf", key="cefi_upload")
+    uploaded_cefi_parent = st.file_uploader(
+        "Upload CEFI Parent Report (.pdf)", type="pdf", key="cefi_parent_upload"
+    )
+    uploaded_cefi_teacher = st.file_uploader(
+        "Upload CEFI Teacher Report (.pdf)", type="pdf", key="cefi_teacher_upload"
+    )
+
     cefi_df = pd.DataFrame()
-    if uploaded_cefi:
+    if uploaded_cefi_parent:
         try:
-            with pdfplumber.open(uploaded_cefi) as pdf:
+            with pdfplumber.open(uploaded_cefi_parent) as pdf:
                 table = pdf.pages[2].extract_tables()[0]
             df = pd.DataFrame(table)
-            st.write("Initial shape:", df.shape)
+            st.write("Parent initial shape:", df.shape)
             valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
             df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
             if df.shape[1] > 4:
@@ -315,13 +321,39 @@ with tab5:
             df = df.drop(columns=valid_col_drops).reset_index(drop=True)
             cefi_df = df.copy()
             cefi_df.columns = ["Scale", "Percentile", "SW"]
-            st.write("Final shape:", cefi_df.shape)
+            st.write("Parent final shape:", cefi_df.shape)
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
             st.session_state["cefi_df"] = cefi_df
             st.dataframe(cefi_df)
         except Exception as e:
-            st.error(f"Error processing CEFI PDF: {e}")
+            st.error(f"Error processing CEFI Parent PDF: {e}")
+            st.exception(e)
+
+    cefi_teacher_df = pd.DataFrame()
+    if uploaded_cefi_teacher:
+        try:
+            with pdfplumber.open(uploaded_cefi_teacher) as pdf:
+                table = pdf.pages[2].extract_tables()[0]
+            df = pd.DataFrame(table)
+            st.write("Teacher initial shape:", df.shape)
+            valid_row_drops = [i for i in [0, 1, 3, 4] if 0 <= i < len(df)]
+            df = df.drop(df.index[valid_row_drops]).reset_index(drop=True)
+            if df.shape[1] > 4:
+                df.iat[0, 3] = df.iat[0, 4]
+                df.iat[0, 4] = ""
+            df.iat[0, 0] = "Total"
+            valid_col_drops = [c for c in [1, 2, 4, 5, 6] if c in df.columns]
+            df = df.drop(columns=valid_col_drops).reset_index(drop=True)
+            cefi_teacher_df = df.copy()
+            cefi_teacher_df.columns = ["Scale", "Percentile", "SW"]
+            st.write("Teacher final shape:", cefi_teacher_df.shape)
+            cefi_teacher_df["Classification"] = cefi_teacher_df["Percentile"].apply(classify)
+            cefi_teacher_df["Percentile*"] = cefi_teacher_df["Percentile"].apply(format_percentile_with_suffix)
+            st.session_state["cefi_teacher_df"] = cefi_teacher_df
+            st.dataframe(cefi_teacher_df)
+        except Exception as e:
+            st.error(f"Error processing CEFI Teacher PDF: {e}")
             st.exception(e)
 
 with tab6:
@@ -468,7 +500,8 @@ with tab7:
                     lookup[f"{name} Change"] = trend
 
             cefi_df = st.session_state.get("cefi_df", pd.DataFrame())
-            # === CEFI
+            cefi_teacher_df = st.session_state.get("cefi_teacher_df", pd.DataFrame())
+            # === CEFI Parent
             if not cefi_df.empty:
                 for _, row in cefi_df.iterrows():
                     scale = row['Scale'].strip()
@@ -476,6 +509,14 @@ with tab7:
                     lookup[f"CEFI {scale} Percentile"]      = str(row['Percentile']).strip()
                     lookup[f"CEFI {scale} Percentile*"]     = str(row['Percentile*']).strip()
                     lookup[f"CEFI {scale} SW"]              = str(row['SW']).strip()
+            # === CEFI Teacher
+            if not cefi_teacher_df.empty:
+                for _, row in cefi_teacher_df.iterrows():
+                    scale = row['Scale'].strip()
+                    lookup[f"CEFI Teacher {scale} Classification"] = row['Classification']
+                    lookup[f"CEFI Teacher {scale} Percentile"]      = str(row['Percentile']).strip()
+                    lookup[f"CEFI Teacher {scale} Percentile*"]     = str(row['Percentile*']).strip()
+                    lookup[f"CEFI Teacher {scale} SW"]              = str(row['SW']).strip()
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
             wisc_combined = pd.DataFrame()
