@@ -352,7 +352,12 @@ with tab5:
     uploaded_cefi_teacher = st.file_uploader(
         "Upload CEFI Teacher Report (.pdf)", type="pdf", key="cefi_teacher_upload"
     )
-
+    
+    def _norm_scale(s: str) -> str:
+    s = re.sub(r'[^A-Za-z ]', '', str(s))   # letters + spaces only
+    s = re.sub(r'\s+', ' ', s).strip()      # collapse spaces
+    return s
+            
     cefi_df = pd.DataFrame()
     if uploaded_cefi_parent:
         try:
@@ -370,6 +375,8 @@ with tab5:
             df = df.drop(columns=valid_col_drops).reset_index(drop=True)
             cefi_df = df.copy()
             cefi_df.columns = ["Scale", "Percentile", "SW"]
+            cefi_df["Scale"] = cefi_df["Scale"].apply(_norm_scale)
+            cefi_df["SW"] = cefi_df["SW"].replace({"None": "N/A"}).fillna("N/A")
             st.write("Parent final shape:", cefi_df.shape)
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
@@ -396,6 +403,8 @@ with tab5:
             df = df.drop(columns=valid_col_drops).reset_index(drop=True)
             cefi_teacher_df = df.copy()
             cefi_teacher_df.columns = ["Scale", "Percentile", "SW"]
+            cefi_teacher_df["Scale"] = cefi_teacher_df["Scale"].apply(_norm_scale)
+            cefi_teacher_df["SW"] = cefi_teacher_df["SW"].replace({"None": "N/A"}).fillna("N/A")
             st.write("Teacher final shape:", cefi_teacher_df.shape)
             cefi_teacher_df["Classification"] = cefi_teacher_df["Percentile"].apply(classify)
             cefi_teacher_df["Percentile*"] = cefi_teacher_df["Percentile"].apply(format_percentile_with_suffix)
@@ -567,21 +576,24 @@ with tab7:
                     lookup[f"CEFI Teacher {scale} Percentile*"]     = str(row['Percentile*']).strip()
                     lookup[f"CEFI Teacher {scale} SW"]              = str(row['SW']).strip()
             
-            cefi_heading = ""
-            if not cefi_df.empty and not cefi_teacher_df.empty:
-                cefi_heading = (
-                    "The percentiles for the parent and teacher rating scales are presented in the table that follows for comparison."
-                )
-            elif not cefi_df.empty:
-                cefi_heading = (
-                    "The percentiles for the parent rating scales are presented in the table that follows:"
-                )
-            elif not cefi_teacher_df.empty:
-                cefi_heading = (
-                    "The percentiles for the teacher rating scales are presented in the table that follows:"
-                )
-            if cefi_heading:
-                lookup["CEFI Heading"] = cefi_heading
+            def _prefill_missing_cefi_channel(lookup: dict, channel: str, scales: set):
+                prefix = "CEFI" if channel == "Parent" else "CEFI Teacher"
+                for sc in sorted(scales):
+                    lookup.setdefault(f"{prefix} {sc} Percentile", "N/A")
+                    lookup.setdefault(f"{prefix} {sc} Percentile*", "N/A")
+                    lookup.setdefault(f"{prefix} {sc} Classification", "N/A")
+                    lookup.setdefault(f"{prefix} {sc} SW", "N/A")
+
+            all_cefi_scales = set()
+            if not cefi_df.empty:
+                all_cefi_scales |= set(cefi_df["Scale"])
+            if not cefi_teacher_df.empty:
+                all_cefi_scales |= set(cefi_teacher_df["Scale"])
+
+            if (not cefi_df.empty) and cefi_teacher_df.empty:
+                _prefill_missing_cefi_channel(lookup, "Teacher", all_cefi_scales)
+            if cefi_df.empty and (not cefi_teacher_df.empty):
+                _prefill_missing_cefi_channel(lookup, "Parent", all_cefi_scales)
                 
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
