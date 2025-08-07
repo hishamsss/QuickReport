@@ -318,7 +318,6 @@ with tab5:
             st.write("Final shape:", cefi_df.shape)
             cefi_df["Classification"] = cefi_df["Percentile"].apply(classify)
             cefi_df["Percentile*"] = cefi_df["Percentile"].apply(format_percentile_with_suffix)
-            cefi_df = cefi_df.replace("-", "#")
             st.session_state["cefi_df"] = cefi_df
             st.dataframe(cefi_df)
         except Exception as e:
@@ -474,9 +473,9 @@ with tab7:
                 for _, row in cefi_df.iterrows():
                     scale = row['Scale'].strip()
                     lookup[f"CEFI {scale} Classification"] = row['Classification']
-                    lookup[f"CEFI {scale} Percentile"] = str(row['Percentile']).strip()
-                    lookup[f"CEFI {scale} Percentile*"] = str(row['Percentile*']).strip()
-                    lookup[f"CEFI {scale} SW"] = str(row['SW']).strip()  
+                    lookup[f"CEFI {scale} Percentile"]      = str(row['Percentile']).strip()
+                    lookup[f"CEFI {scale} Percentile*"]     = str(row['Percentile*']).strip()
+                    lookup[f"CEFI {scale} SW"]              = str(row['SW']).strip()
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
             wisc_combined = pd.DataFrame()
