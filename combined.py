@@ -72,26 +72,75 @@ def format_percentile_with_suffix(percentile):
         return f"{percentile}{suffix}"
 
 def replace_placeholders(doc, lookup):
+    def copy_run_style(source_run, target_run):
+        target_run.font.bold = source_run.font.bold
+        target_run.font.italic = source_run.font.italic
+        target_run.font.underline = source_run.font.underline
+        target_run.font.size = source_run.font.size
+        target_run.font.name = source_run.font.name
+        if source_run.font.color.rgb:
+            target_run.font.color.rgb = source_run.font.color.rgb
+
     def replace_in_runs(runs, lookup):
-        n = len(runs)
-        i = 0
-        while i < n:
-            found = False
-            combined_text = ''
-            for j in range(i, n):
-                combined_text += runs[j].text
-                for key, value in lookup.items():
-                    placeholder = f"{{{{{key}}}}}"
-                    if placeholder in combined_text:
-                        new_text = combined_text.replace(placeholder, value)
-                        runs[i].text = new_text
-                        for k in range(i + 1, j + 1):
-                            runs[k].text = ''
-                        found = True
-                        break
-                if found:
+        pattern = re.compile(r"{{(.*?)}}")
+        search_start = 0
+        while True:
+            full_text = "".join(run.text for run in runs)
+            match = pattern.search(full_text, search_start)
+            if not match:
+                break
+            key = match.group(1)
+            if key not in lookup:
+                search_start = match.end()
+                continue
+            replacement = lookup[key]
+            start, end = match.span()
+
+            # Identify runs affected by the placeholder
+            affected_runs = []
+            current = 0
+            for run in runs:
+                run_len = len(run.text)
+                run_start = current
+                run_end = current + run_len
+                if run_end > start and run_start < end:
+                    affected_runs.append((run, run_start, run_end))
+                if run_end >= end:
                     break
-            i = j + 1 if found else i + 1
+                current = run_end
+
+            if not affected_runs:
+                search_start = match.end()
+                continue
+
+            start_run, start_run_start, _ = affected_runs[0]
+            end_run, end_run_start, _ = affected_runs[-1]
+            start_offset = start - start_run_start
+            end_offset = end - end_run_start
+
+            if start_run is end_run:
+                start_run.text = (
+                    start_run.text[:start_offset] + replacement + start_run.text[end_offset:]
+                )
+            else:
+                prefix = start_run.text[:start_offset]
+                suffix = end_run.text[end_offset:]
+                style_run = affected_runs[1][0] if len(affected_runs) > 1 else start_run
+                start_run.text = prefix + replacement
+                copy_run_style(style_run, start_run)
+
+                in_between = False
+                for run in runs:
+                    if in_between:
+                        if run is end_run:
+                            break
+                        run.text = ""
+                    if run is start_run:
+                        in_between = True
+
+                end_run.text = suffix
+
+            search_start = start + len(replacement)
 
     for para in doc.paragraphs:
         replace_in_runs(para.runs, lookup)
