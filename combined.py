@@ -604,11 +604,11 @@ with tab7:
                 _prefill_missing_cefi_channel(lookup, "Parent", all_cefi_scales)
 
             if not cefi_df.empty and not cefi_teacher_df.empty:
-                lookup["CEFI Heading"] = "CEFI Parent & Teacher"
+                lookup["CEFI Heading"] = "The percentiles for the parent and teacher rating scales are presented in the table that follows for comparison."
             elif not cefi_df.empty:
-                lookup["CEFI Heading"] = "CEFI Parent"
+                lookup["CEFI Heading"] = "The percentiles for the parent rating scales are presented in the table that follows."
             elif not cefi_teacher_df.empty:
-                lookup["CEFI Heading"] = "CEFI Teacher"
+                lookup["CEFI Heading"] = "The percentiles for the teacher rating scales are presented in the table that follows."
                 
             # === WISC
             input_wisc_doc = Document(uploaded_wisc)
