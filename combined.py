@@ -414,9 +414,9 @@ with tab6:
     st.subheader("CBRS")
 
     cbrs_options = [
-        "Academic",
-        "Inattention/Hyperactivity",
-        "Impulsivity",
+        "Academics",
+        "Impulsivity/Hyperactivity",
+        "Inattention",
         "Oppositional and Aggressive Behaviors",
         "Mood",
         "Anxiety",
